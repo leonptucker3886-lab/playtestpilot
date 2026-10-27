@@ -1,2 +1,2 @@
-# playtestpilot
-PlaytestPilot rough draft - automated playtesting for indie web games
+# PlaytestPilot (rough draft)
+Automated playtesting for indie web games. Not linked from LeonLink until polished.
