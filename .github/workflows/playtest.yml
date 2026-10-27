@@ -1,5 +1,10 @@
 name: PlaytestPilot
-on: [workflow_dispatch]
+on:
+  workflow_dispatch:
+    inputs:
+      game_url: { description: 'Game URL to playtest', required: false, default: 'https://joustline-alpha.vercel.app' }
+      seconds: { description: 'How long to play (seconds)', required: false, default: '30' }
+      seed: { description: 'Random seed (repeat a run exactly)', required: false, default: '' }
 jobs:
   playtest:
     runs-on: ubuntu-latest
@@ -7,5 +12,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
-      - run: npm i playwright && npx playwright install --with-deps chromium
-      - run: node bot/playtest.mjs ${{ vars.GAME_URL || 'https://joustline-alpha.vercel.app' }} 30
+      - run: npm i playwright@1 && npx playwright install --with-deps chromium
+      - run: node bot/playtest.mjs "${{ inputs.game_url }}" "${{ inputs.seconds }}" "${{ inputs.seed }}"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with: { name: playtest-report, path: "playtest-report.json\nplaytest-final.png", if-no-files-found: ignore }
+      - if: always()
+        run: test -f playtest-report.json && node -e "const r=require('./playtest-report.json');console.log('### '+r.summary+'\n\nSeed: '+r.seed+' (re-run with this seed to reproduce)')" >> $GITHUB_STEP_SUMMARY || true

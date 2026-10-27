@@ -1,32 +1,39 @@
-# PlaytestPilot v0.1 — How to use it (rough draft)
+# PlaytestPilot v0.2 (beta): How to use it
 
-PlaytestPilot plays a web game automatically and reports crashes, console errors and frozen screens. Not linked from LeonLink until polished.
+PlaytestPilot plays a web game automatically and reports crashes, errors and frozen screens. It is not linked from LeonLink until it's polished.
 
 ## 1. Quick test in the browser
 1. Open https://playtestpilot.vercel.app
-2. Paste a game URL (e.g. https://joustline-alpha.vercel.app).
-3. Start the run. The page loads the game and sends random inputs for about 20 seconds.
-4. Watch the game frame for freezes or errors.
+2. Paste a game URL, such as https://joustline-alpha.vercel.app, and press **Run playtest**.
+3. With no setup, this is a **load check** only. It confirms the page loads, can be embedded and stays up for 20 seconds.
+4. For real inputs and error capture, add this line to the game's HTML, then run it again:
+   `<script src="https://playtestpilot.vercel.app/ptp-sdk.js"></script>`
+   The log will say "SDK connected". You get PASS or FAIL based on errors, a frozen screen, or the game no longer responding.
 
-Note: some games block being shown inside another page. If the frame stays blank, use the bot (step 2).
+If the frame stays blank, the game blocks embedding. Use the bot in step 2.
 
-## 2. Headless bot via GitHub Actions
+## 2. Full bot with GitHub Actions
 1. Go to https://github.com/leonptucker3886-lab/playtestpilot/actions
-2. Pick the **PlaytestPilot** workflow and click **Run workflow**.
-3. It installs headless Chromium and runs `bot/playtest.mjs` against the game for 30 seconds.
-4. Open the run log for the PASS / FAIL result and any errors found.
+2. Choose **PlaytestPilot**, then **Run workflow**.
+3. Enter the game URL, how many seconds to play (30 by default) and, optionally, a seed.
+4. The run summary shows PASS or FAIL. Download **playtest-report** for the full JSON report and the final screenshot.
+5. To repeat a failing run exactly, run it again with the seed shown in the summary.
 
-### Choosing the game
-- Default target: https://joustline-alpha.vercel.app
-- To test another game: Settings > Secrets and variables > Actions > Variables, add `GAME_URL` with the game's address.
-
-## 3. Run locally
+## 3. Run it on your own computer
 ```
-npm i playwright
-npx playwright install chromium
-node bot/playtest.mjs <game-url> <seconds>
+npm i playwright && npx playwright install chromium
+node bot/playtest.mjs <game-url> [seconds] [seed]
 ```
+Exit code 0 means pass, 1 means fail, 2 means the command was wrong.
 
-## Roadmap
-- Phase 2: run on every game, tune detection, auto-file bug reports as GitHub issues.
-- Later: run on every push, move to a leonlink.net subdomain once DNS exists.
+## What counts as a fail
+- The page didn't load (it timed out or returned an HTTP error)
+- The browser tab crashed
+- A JavaScript error or console error (missing favicon errors are ignored)
+- The screen didn't change for about 20 seconds while the bot was pressing keys
+
+## Known limits
+- A game whose title screen doesn't move until you click may be flagged as frozen.
+- The in-browser test can't press keys in games that don't include ptp-sdk.js.
+
+See LOGBOOK.md for the change history.
