@@ -15,7 +15,7 @@ function log(m,c){const s=document.createElement('div');s.textContent=m;if(c)s.c
 window.addEventListener('message',e=>{const d=e.data;if(!st||!d||d.ptp!=='report')return;if(d.type==='hello'){st.sdk=true;log('SDK connected: inputs and error capture are on.')}else if(d.type==='error'){st.errors.push(d.msg);log('Error: '+d.msg,'fail')}else if(d.type==='heartbeat'){st.beats++;if(d.frameAgeMs>3000)st.frozen=true}});
 function run(){let u=$('u').value.trim();if(!/^https?:\/\//.test(u)){$('log').textContent='Enter a full URL starting with https://';return}
 st={sdk:false,errors:[],beats:0,frozen:false,loaded:false};$('go').disabled=true;$('log').textContent='';log('Loading '+u+' …');
-const f=$('f');f.onload=()=>{st.loaded=true;log('Page loaded.')};f.src=u;
+const f=$('f');f.onload=()=>{if(!st.loaded){st.loaded=true;log('Page loaded.')}};f.src=u;
 const keys=['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' ','Enter','z','x'];let n=0;
 const t=setInterval(()=>{n++;if(st.sdk)f.contentWindow.postMessage({ptp:'key',key:keys[Math.floor(Math.random()*keys.length)]},'*');if(n%20==0)log((st.sdk?'Inputs sent: ':'Seconds elapsed: ')+(st.sdk?n:n/4));
 if(n>=80){clearInterval(t);$('go').disabled=false;

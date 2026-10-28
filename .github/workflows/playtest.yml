@@ -16,6 +16,14 @@ jobs:
       - run: node bot/playtest.mjs "${{ inputs.game_url }}" "${{ inputs.seconds }}" "${{ inputs.seed }}"
       - if: always()
         uses: actions/upload-artifact@v4
-        with: { name: playtest-report, path: "playtest-report.json\nplaytest-final.png", if-no-files-found: ignore }
+        with:
+          name: playtest-report
+          path: |
+            playtest-report.json
+            playtest-final.png
+          if-no-files-found: ignore
       - if: always()
-        run: test -f playtest-report.json && node -e "const r=require('./playtest-report.json');console.log('### '+r.summary+'\n\nSeed: '+r.seed+' (re-run with this seed to reproduce)')" >> $GITHUB_STEP_SUMMARY || true
+        run: |
+          if [ -f playtest-report.json ]; then
+            node -e "const r=require('./playtest-report.json');console.log('### '+r.summary+'\n\nSeed: '+r.seed+' (re-run with this seed to reproduce)')" >> "$GITHUB_STEP_SUMMARY"
+          fi
